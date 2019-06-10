@@ -41,21 +41,18 @@ dic = selected_df.to_dict('list')
 year = dic['Year']
 population = dic['Total Population']
 
+#Difference in population growth to plot y axis in equal intervals
+pop_increase = max(population) - min(population)
+yaxis_interval = (pop_increase/len(year))
+
 #create a Line plot
 x = np.array(year)
 y = np.array(population)
 my_xticks = year
 plt.xticks(x, my_xticks)
+plt.yticks(np.arange(min(y),max(y)+1, yaxis_interval))
 plt.plot(x, y)
 plt.show()
-
-
-
-
-
-
-
-
 
 
 
