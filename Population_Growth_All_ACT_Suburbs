@@ -1,0 +1,79 @@
+## Script to read ACT population projection dataset and calculate the percentage growth for all ACT suburbs
+## Created by Vid dhamodaran
+## Created on 07/06/2019
+
+#!/usr/bin/env python
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+#Create the dataframe from CSV source
+df = pd.read_csv(r"C:\Users\DhamodV\Documents\Data_Sets\ACT_Population_Projections_by_Suburb__2015_-_2020_.csv", encoding="utf-8", skipinitialspace=True)
+
+#Sort the dataframe based on suburb column
+df = df.sort_values(by = ['Suburb'], ascending = True)
+
+#Remove any white space and special characters in the suburb names
+df['Suburb'] = df['Suburb'].str.replace(' ', '')
+#df['Suburb'] = df['Suburb'].str.replace('-', '')
+#df['Suburb'] = df['Suburb'].str.replace('\'', '')
+
+#Replace Year column values with only year like 2015 from datetime values
+df['Year'] = pd.DatetimeIndex(df['Year']).year
+
+#Get Distinct suburb names
+suburb_list=df['Suburb'].unique().tolist()
+
+#initiate an empty dictionary
+dic = {}
+
+#get the start and end year values to calculate population growth
+print("########### Please Enter Year Range Between 2015 to 2020 ###########")
+start_year = int(input("From which year do you want to calculate population growth: "))
+end_year = int(input("Up to which year do you want to calculate population growth: "))
+pop_growth = 0
+
+#Calculate the population growth percentage based on suburb 
+for n in suburb_list:
+	#Create a temporary dataframe to store the data based on suburb
+	temp_df = df.loc[df['Suburb'] == n]
+	
+	#get the total population for the year range
+	a = temp_df.loc[temp_df['Year'] == start_year, 'Total Population'].iloc[0]
+	b = temp_df.loc[temp_df['Year'] == end_year, 'Total Population'].iloc[0]
+	growth = ((100*(b-a))/a)
+	pop_growth = int(round(growth))
+	#add suburb as key and pop growth as value to dictionary
+	dic[n] = pop_growth
+	
+#Extract the data to plot
+suburb_names = list(dic.keys())
+values = list(dic.values())
+
+#First graph - Bar Chart
+x_pos = np.arange(len(suburb_names))
+plt.bar(x_pos, values, align='center', alpha=0.5)
+plt.xticks(x_pos, suburb_names)
+plt.ylabel('Population Growth')
+plt.title('Predicated Population Growth in Percentage from {0} to {1}'.format(start_year,end_year))
+plt.show()
+
+#Second graph - Scatter graph
+data = np.array(values, dtype=np.float32)
+fig, ax = plt.subplots()
+ax.scatter(suburb_names, data)
+#set y-axis limit to accommodate negative values
+plt.ylim(-50,150)
+ax.set_xlabel('Suburbs')
+ax.set_ylabel('Predicated Population Growth in Percentage from {0} to {1}'.format(start_year,end_year))
+plt.show()
+
+'''
+x = np.array([0,1,2,3])
+y = np.array([20,21,22,23])
+my_xticks = ['John','Arnold','Mavis','Matt']
+plt.xticks(x, my_xticks)
+plt.plot(x, y)
+plt.show()
+'''
