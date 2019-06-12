@@ -2,7 +2,7 @@
 ## Created by Vid dhamodaran
 ## Initial Draft : 07/06/2019
 ## Version 1 : 11/06/2019 - added postcode by joining australian postcode dataset 
-## Version 2 : 12/06/2019 - added scatter and bar graphs
+## Version 2 : 12/06/2019 - added scatter, bar graphs and pie chart
 
 #!/usr/bin/env python
 
@@ -102,8 +102,8 @@ plt.yticks(np.arange(min(y),max(y)+1, yaxis_interval))
 plt.title("Population Growth from 2015 to 2019 for {0} - {1}".format(input_suburb,postcode))
 plt.plot(x, y)
 plt.show()
-
-
+'''
+'''
 #Second graph - Scatter graph
 y_data = np.array(population, dtype=np.float32)
 fig, ax = plt.subplots()
@@ -113,8 +113,9 @@ ax.set_ylabel('Population of {0}'.format(input_suburb))
 plt.title("Population Growth from 2015 to 2019 for {0} - {1}".format(input_suburb,postcode))
 plt.show()
 '''
-#Third graph - Bar graph
 
+'''
+#Third graph - Bar graph
 x = np.array(year)
 y = np.array(population)
 plt.bar(x, y, align='center', alpha=0.5, color='g')
@@ -122,4 +123,23 @@ plt.xlabel('Year')
 plt.ylabel('Population of {0}'.format(input_suburb))
 plt.title("Population Growth from 2015 to 2019 for {0} - {1}".format(input_suburb,postcode))
 plt.show()
+'''
 
+#fourth graph - Pie chart
+labels = year
+values = np.array(population)
+explode = (0.1, 0, 0, 0, 0, 0)
+
+#function to calculate values for autopct - to have actual population values on pie chart rather than percentages 
+def autopct_format(values):
+    def my_format(pct):
+        total = sum(values)
+        val = int(round(pct*total/100.0))
+        return '{v}'.format(v=val)
+    return my_format
+
+
+plt.pie(values, explode=explode, labels=labels, autopct=autopct_format(values))
+plt.axis('equal')
+plt.title("Population Growth from 2015 to 2019 for {0} - {1}".format(input_suburb,postcode))
+plt.show()
