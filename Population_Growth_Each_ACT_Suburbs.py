@@ -3,6 +3,7 @@
 ## Initial Draft : 07/06/2019
 ## Version 1 : 11/06/2019 - added postcode by joining australian postcode dataset 
 ## Version 2 : 12/06/2019 - added scatter, bar graphs and pie chart
+## Version 3 : 13/06/2019 - added one more bar graph with mouse hover display text option
 
 #!/usr/bin/env python
 
@@ -29,6 +30,9 @@ df['Suburb'] = df['Suburb'].str.upper()
 
 #Replace Year column values with only year like 2015 from datetime values
 df['Year'] = pd.DatetimeIndex(df['Year']).year
+
+#Sort the dataframe based on year column
+df = df.sort_values(by = ['Year'], ascending = True)
 
 #Get Distinct suburb names and locality
 suburb_list=df['Suburb'].unique().tolist()
@@ -99,7 +103,7 @@ y = np.array(population)
 my_xticks = year
 plt.xticks(x, my_xticks)
 plt.yticks(np.arange(min(y),max(y)+1, yaxis_interval))
-plt.title("Population Growth from 2015 to 2019 for {0} - {1}".format(input_suburb,postcode))
+plt.title("Population Growth from 2015 to 2019 for {0}, ACT - {1}".format(input_suburb,postcode))
 plt.plot(x, y)
 plt.show()
 '''
@@ -110,7 +114,7 @@ fig, ax = plt.subplots()
 ax.scatter(year, y_data)
 ax.set_xlabel('Year')
 ax.set_ylabel('Population of {0}'.format(input_suburb))
-plt.title("Population Growth from 2015 to 2019 for {0} - {1}".format(input_suburb,postcode))
+plt.title("Population Growth from 2015 to 2019 for {0}, ACT - {1}".format(input_suburb,postcode))
 plt.show()
 '''
 
@@ -121,10 +125,11 @@ y = np.array(population)
 plt.bar(x, y, align='center', alpha=0.5, color='g')
 plt.xlabel('Year')
 plt.ylabel('Population of {0}'.format(input_suburb))
-plt.title("Population Growth from 2015 to 2019 for {0} - {1}".format(input_suburb,postcode))
+plt.title("Population Growth from 2015 to 2019 for {0}, ACT - {1}".format(input_suburb,postcode))
 plt.show()
 '''
 
+'''
 #fourth graph - Pie chart
 labels = year
 values = np.array(population)
@@ -138,8 +143,59 @@ def autopct_format(values):
         return '{v}'.format(v=val)
     return my_format
 
-
-plt.pie(values, explode=explode, labels=labels, autopct=autopct_format(values))
+colors = ['gold', 'yellowgreen', 'lightcoral', 'lightskyblue', 'red', 'grey']
+plt.pie(values, explode=explode, labels=labels, autopct=autopct_format(values), colors=colors)
 plt.axis('equal')
-plt.title("Population Growth from 2015 to 2019 for {0} - {1}".format(input_suburb,postcode))
+plt.title("Population Growth from 2015 to 2019 for {0}, ACT - {1}".format(input_suburb,postcode))
+plt.show()
+'''
+
+#Fifth graph - Bar graph with mouse hover display information 
+x_year = np.array(year)
+y_population = np.array(population)
+
+fig=plt.figure()
+ax=plt.subplot()
+
+xpos=np.arange(len(x_year))
+
+bars = plt.bar(x_year,y_population, color='g')
+
+
+annot = ax.annotate("", xy=(0,0), xytext=(-15,15),textcoords="offset points",
+                    bbox=dict(boxstyle="round", fc="yellow", ec="b"),
+                    arrowprops=dict(arrowstyle="->"))
+annot.set_visible(False)
+
+def update_annot(bar):
+	#Get x-axis and y-axis values from the graph
+    x = bar.get_x()+bar.get_width()/2.
+    y = bar.get_y()+bar.get_height()
+	#assign the obtained values for annotation 
+    annot.xy = (x,y)
+	#Provide the text to be displayed
+    text = "({0})".format( y )
+    annot.set_text(text)
+    annot.get_bbox_patch().set_alpha(0.4)
+
+
+def hover(event):
+    vis = annot.get_visible()
+    if event.inaxes == ax:
+        for bar in bars:
+            cont, ind = bar.contains(event)
+            if cont:
+                update_annot(bar)
+                annot.set_visible(True)
+                fig.canvas.draw_idle()
+                return
+    if vis:
+        annot.set_visible(False)
+        fig.canvas.draw_idle()
+
+fig.canvas.mpl_connect("motion_notify_event", hover)
+
+plt.xlabel('Year')
+plt.ylabel('Population of {0}'.format(input_suburb))
+plt.title("Population Growth from 2015 to 2019 for {0}, ACT - {1}".format(input_suburb,postcode))
 plt.show()
